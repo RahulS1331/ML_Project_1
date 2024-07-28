@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celebrity Image Classifier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .drop-zone {
+            border: 2px dashed #ccc;
+            width: 300px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .results-table th, .results-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .results-table th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Celebrity Image Classifier</h1>
+
+    <div class="drop-zone" id="drop-zone" onclick="handleClick()">
+        <p>Drag files here or click to upload</p>
+    </div>
+    <input type="file" id="file-input" style="display: none;" accept="image/*">
+
+    <button onclick="classifyImage()">Classify</button>
+
+    <table class="results-table" id="results-table">
+        <thead>
+            <tr>
+                <th>Celebrity</th>
+                <th>Probability Score</th>
+            </tr>
+        </thead>
+        <tbody id="results-body">
+            <!-- Results will be inserted here dynamically -->
+        </tbody>
+    </table>
+
+    <script>
+        function handleClick() {
+            document.getElementById('file-input').click();
+        }
+
+        function classifyImage() {
+            let fileInput = document.getElementById('file-input');
+            let file = fileInput.files[0];
+
+            if (file) {
+                let formData = new FormData();
+                formData.append('file', file);
+
+                fetch('/classify', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    displayResults(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                alert('Please select a file to classify.');
+            }
+        }
+
+        function displayResults(result) {
+            let resultsBody = document.getElementById('results-body');
+            resultsBody.innerHTML = '';
+
+            let row = `<tr>
+                           <td>${result.celebrity}</td>
+                           <td>${result.probability.toFixed(4)}</td>
+                       </tr>`;
+            resultsBody.innerHTML += row;
+        }
+    </script>
+</body>
+</html>
